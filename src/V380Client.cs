@@ -896,6 +896,16 @@ namespace V380Decoder.src
             if (h264NalType is 1 or 5)
                 return VideoCodec.H264;
 
+            // H264 SPS (type 7) and H265 IDR_W_RADL (type 19) share this exact byte
+            // value under their respective 5-bit/6-bit readings, so step 2 below would
+            // otherwise always call it H265. A real H264 SPS NAL is always immediately
+            // followed by profile_idc, which cameras only ever set to one of a handful
+            // of standard values - an actual H265 slice header's second byte essentially
+            // never matches one of these by chance, so this reliably breaks the tie.
+            if (h264NalType == 7 && offset + 1 < payload.Length &&
+                payload[offset + 1] is 66 or 77 or 88 or 100 or 110 or 122 or 244)
+                return VideoCodec.H264;
+
             int h265NalType = (nalHeader >> 1) & 0x3F;
             if (h265NalType is > 0 and < 48)
                 return VideoCodec.H265;

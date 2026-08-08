@@ -17,6 +17,11 @@ namespace V380Decoder.src
         private bool disposed;
         private ulong generatedTimestamp;
 
+        private readonly object paramLock = new();
+        private byte[] vpsNal;
+        private byte[] spsNal;
+        private byte[] ppsNal;
+
         public bool IsAvailable { get; private set; }
 
         public H264Transcoder(Action<FrameData> onFrame)
@@ -30,12 +35,14 @@ namespace V380Decoder.src
             if (!IsAvailable || disposed || frame?.Payload == null || frame.Payload.Length == 0)
                 return;
 
+            byte[] payload = CacheAndInjectParams(frame.Payload);
+
             timestamps.Enqueue(frame.Timestamp);
             lock (inputLock)
             {
                 try
                 {
-                    process.StandardInput.BaseStream.Write(frame.Payload, 0, frame.Payload.Length);
+                    process.StandardInput.BaseStream.Write(payload, 0, payload.Length);
                     process.StandardInput.BaseStream.Flush();
                 }
                 catch (Exception ex)
@@ -44,6 +51,45 @@ namespace V380Decoder.src
                     LogUtils.debug($"[RTSP-XCODE] stdin write failed: {ex.Message}");
                 }
             }
+        }
+
+        // Some HEVC cameras only emit VPS/SPS/PPS once (or intermittently), not on
+        // every IDR. ffmpeg's raw hevc decoder parses whatever byte stream we hand
+        // it and can't decode an IDR without those parameter sets - it silently logs
+        // "missing picture in access unit" and never produces output, so the RTSP
+        // stream hangs forever. Cache the params the moment we see them and prepend
+        // them to every IDR access unit, same trick SnapshotManager already uses to
+        // make single-shot JPEG snapshots work for the same cameras.
+        private byte[] CacheAndInjectParams(byte[] payload)
+        {
+            bool isIdr = false;
+            RtspServer.ParseNals(payload, VideoCodec.H265, (nalType, nal) =>
+            {
+                switch (nalType)
+                {
+                    case 32: lock (paramLock) vpsNal = nal; break;
+                    case 33: lock (paramLock) spsNal = nal; break;
+                    case 34: lock (paramLock) ppsNal = nal; break;
+                    case 19:
+                    case 20: isIdr = true; break;
+                }
+            });
+
+            if (!isIdr)
+                return payload;
+
+            byte[] vps, sps, pps;
+            lock (paramLock) { vps = vpsNal; sps = spsNal; pps = ppsNal; }
+            if (sps == null || pps == null)
+                return payload;
+
+            byte[] startCode = { 0, 0, 0, 1 };
+            using var ms = new MemoryStream();
+            if (vps != null) { ms.Write(startCode, 0, 4); ms.Write(vps, 0, vps.Length); }
+            ms.Write(startCode, 0, 4); ms.Write(sps, 0, sps.Length);
+            ms.Write(startCode, 0, 4); ms.Write(pps, 0, pps.Length);
+            ms.Write(payload, 0, payload.Length);
+            return ms.ToArray();
         }
 
         private void Start()
