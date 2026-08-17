@@ -262,6 +262,11 @@ namespace V380Decoder.src
                     <tt:SourceToken>VideoSource_1</tt:SourceToken>
                     <tt:Bounds x=""0"" y=""0"" width=""1280"" height=""720""/>
                   </tt:VideoSourceConfiguration>
+                  <tt:AudioSourceConfiguration token=""AudioSrcCfg_1"">
+                    <tt:Name>AudioSource</tt:Name>
+                    <tt:UseCount>1</tt:UseCount>
+                    <tt:SourceToken>AudioSource_1</tt:SourceToken>
+                  </tt:AudioSourceConfiguration>
                   <tt:VideoEncoderConfiguration token=""VideoEnc_1"">
                     <tt:Name>H264</tt:Name>
                     <tt:UseCount>1</tt:UseCount>
@@ -282,11 +287,6 @@ namespace V380Decoder.src
                     </tt:Multicast>
                     <tt:SessionTimeout>PT60S</tt:SessionTimeout>
                   </tt:VideoEncoderConfiguration>
-                  <tt:AudioSourceConfiguration token=""AudioSrcCfg_1"">
-                    <tt:Name>AudioSource</tt:Name>
-                    <tt:UseCount>1</tt:UseCount>
-                    <tt:SourceToken>AudioSource_1</tt:SourceToken>
-                  </tt:AudioSourceConfiguration>
                   <tt:AudioEncoderConfiguration token=""AudioEnc_1"">
                     <tt:Name>PCMA</tt:Name>
                     <tt:UseCount>1</tt:UseCount>
@@ -329,6 +329,11 @@ namespace V380Decoder.src
                     <tt:SourceToken>VideoSource_1</tt:SourceToken>
                     <tt:Bounds x=""0"" y=""0"" width=""1280"" height=""720""/>
                   </tt:VideoSourceConfiguration>
+                  <tt:AudioSourceConfiguration token=""AudioSrcCfg_1"">
+                    <tt:Name>AudioSource</tt:Name>
+                    <tt:UseCount>1</tt:UseCount>
+                    <tt:SourceToken>AudioSource_1</tt:SourceToken>
+                  </tt:AudioSourceConfiguration>
                   <tt:VideoEncoderConfiguration token=""VideoEnc_1"">
                     <tt:Name>H264</tt:Name>
                     <tt:UseCount>1</tt:UseCount>
@@ -349,11 +354,6 @@ namespace V380Decoder.src
                     </tt:Multicast>
                     <tt:SessionTimeout>PT60S</tt:SessionTimeout>
                   </tt:VideoEncoderConfiguration>
-                  <tt:AudioSourceConfiguration token=""AudioSrcCfg_1"">
-                    <tt:Name>AudioSource</tt:Name>
-                    <tt:UseCount>1</tt:UseCount>
-                    <tt:SourceToken>AudioSource_1</tt:SourceToken>
-                  </tt:AudioSourceConfiguration>
                   <tt:AudioEncoderConfiguration token=""AudioEnc_1"">
                     <tt:Name>PCMA</tt:Name>
                     <tt:UseCount>1</tt:UseCount>
